@@ -67,5 +67,50 @@ $(document).ready(function () {
         .then(function (response) {
             return response.json();
         })
+        .then(function (data) {
+            let currentWeatherEl = document.querySelector("#currentWeather");
+            currentWeatherEl.innerHTML = "";
+
+            let header = document.createElement("h3");
+            header.textContent = data.name;
+            currentWeatherEl.appendChild(heading);
+
+            fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" +
+            data.coord.lat + "&lon=" + data.coord.lon + "&appid=" + API_KEY +
+            "&units=imperial&exclude=minutely,hourly"
+            )
+
+            .them(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                console.log(data);
+
+                let DaysOTW = document.createElement("p");
+
+                let Icons = document.createElement("img");
+                
+                let temperature = document.createElement("p");
+
+                let heat = document.createElement("p");
+
+                let speed = document.createElement("p");
+
+                let uv = document.createElement("p");
+
+                Icons.setAttribute(
+                    "src", "http://openweathermap.org/img/wn/" +
+                    data.current.weather[0].icon + "@2x.png"
+
+                );
+
+                DaysOTW.textContent = "Todays Date: " + currentDay;
+                temperature.textContent = "Temperature: " + data.current.temp + " ºf";
+                heat.textContent = "Humidity: " + data.current.humidity;
+                speed.textContent = "Wind Speeds: " + data.current.wind_speed;
+                uv.textContent = "UV Index: " + data.current.uvi;
+
+            })
+        })
     }
 })
