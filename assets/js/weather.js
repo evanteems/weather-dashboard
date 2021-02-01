@@ -39,6 +39,33 @@ $(document).ready(function () {
         for (let i = 0; i < searchHistory.length; i++) {
             let cityEl = document.createElement("button");
             cityEl.setAttribute("class", "city-item");
+            cityEl.setAttribute("id", searchHistory[i])
+            cityEl.textContent = searchHistory[i];
+            cityHistoryEl.append(cityEl);
         }
+    }
+
+    function addLocalStorage(city) {
+        if (searchHistory.indexOf(city) === -1) {
+            console.log(searchHistory);
+            searchHistory.push(city);
+            window.localStorage.setItem(
+                "searchHistory",
+                JSON.stringify(searchHistory)
+            );
+        }
+
+        console.log(city);
+    }
+
+    function getCityWeather(city) {
+        fetch(
+            "https://api.openweathermap.org/data/2.5/weather?q=" +
+            city + "&appid=" + API_KEY + "&units=imperial"
+        )
+
+        .then(function (response) {
+            return response.json();
+        })
     }
 })
