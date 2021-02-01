@@ -1,53 +1,67 @@
+// ELEMENTS START HERE !!!
 let apiKey = "4e5fc9fe1423a31d4136d1cb80de83da";
 
 let inputEl = document.getElementById("city-input");
 
-let searchEl = document.getElementById("search-key");
+let searchEl = document.getElementById("search-button");
 
 let deleteHistory = document.getElementById("clear-history");
 
-let NameOCEl = document.getElementById("NameOC");
+let cityNameEl = document.getElementById("City-Town");
 
-let currentPicEl = document.getElementById("current-pic");
+let currentPicEl = document.getElementById("pictures");
 
-let currentTempEl = document.getElementById("temperature");
+let currentTempEl = document.getElementById("temp");
 
-let currentheatEl = document.getElementById("heat"); 
+let currentHumidityEl = document.getElementById("heat"); 4
 
 let currentWindEl = document.getElementById("speeds");
 
 let currentUVEl = document.getElementById("uv");
 
-let storedEl = document.getElementById("history");
+let historyEl = document.getElementById("history");
 
-let searchedCity = JSON.parse(localStorage.getItem("search")) || [];
+let CitiesSearched = JSON.parse(localStorage.getItem("search")) || [];
 
-function pullWeather(NameOC) {
-    let lowerNameOC = NameOC.toLowerCase();
-    let urlSearch = "https://api.openweathermap.org/data/2.5/weather?q=" + lowerNameOC + "&appid=" + apiKey;
+
+function pullWeather(cityName) {
+
+    let lowerCityName = cityName.toLowerCase();
+
+    let urlSearch = "https://api.openweathermap.org/data/2.5/weather?q=" + lowerCityName + "&appid=" + apiKey;
 
     fetch(urlSearch)
         .then(function (response) {
             if (response.ok) {
-                checkInputCity(lowerNameOC);
+                checkInputCity(lowerCityName);
                 return response.json();
             } 
             else {
-                alert("Please enter a valid city")
+                alert("Enter a desired City!")
             }
         })
 
         .then(function (response) {
             let currentDate = moment().format("L");
-            NameOCEl.innerHTML = response.name + "(" + currentDate + ")";
+
+            cityNameEl.innerHTML = response.name + "(" + currentDate + ")";
+            
             let weatherPic = response.weather[0].icon;
+
             currentPicEl.setAttribute("src", "https://openweathermap.org/img/wn/" + weatherPic + "@2x.png");
+
             currentPicEl.setAttribute("alt", response.weather[0].description);
+
             currentTempEl.innerHTML = "Temperature: " + kelvinToFahrenheit(response.main.temp) + " &#176F";
-            currentheatEl.innerHTML = "heat: " + response.main.heat + "%";
+
+            currentHumidityEl.innerHTML = "Humidity: " + response.main.humidity + "%";
+
             currentWindEl.innerHTML = "Wind Speed: " + response.wind.speed + " MPH";
+            
             let lat = response.coord.lat;
+
             let lon = response.coord.lon;
+
             let UVurlSearch = "https://api.openweathermap.org/data/2.5/uvi/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&cnt=1";
 
         fetch(UVurlSearch)
@@ -57,7 +71,9 @@ function pullWeather(NameOC) {
 
             .then(function (response2) {
                 let UVIndex = document.createElement("span");
+
                 currentUVEl.innerHTML = "UV Index: ";
+
                 let UVLevels = response2[0].value;
                 if (UVLevels < 2) {
                     UVIndex.setAttribute("class", "badge badge-success");
@@ -78,7 +94,7 @@ function pullWeather(NameOC) {
                 .then(function (response2) {
                     return response2.json();
                 })
-                
+                // OUTCOME COMES OUT HERE !!!!
                 .then(function (response2) {
                     let forecastEls = document.querySelectorAll(".forecast");
                     let varDate = moment().format("L");
@@ -97,21 +113,23 @@ function pullWeather(NameOC) {
                         let forecastTempEl = document.createElement("p");
                         forecastTempEl.innerHTML = "Temp: " + kelvinToFahrenheit(response2.list[forecastIndex].main.temp) + " &#176F";
                         forecastEls[i].append(forecastTempEl);
-                        let forecastheatEl = document.createElement("p");
-                        forecastheatEl.innerHTML = "heat: " + response2.list[forecastIndex].main.heat + "%";
-                        forecastEls[i].append(forecastheatEl);
+                        let forecastHumidityEl = document.createElement("p");
+                        forecastHumidityEl.innerHTML = "Humidity: " + response2.list[forecastIndex].main.humidity + "%";
+                        forecastEls[i].append(forecastHumidityEl);
                     }
                 });
         });
 }
-
-let CheckingCity = function (event) {
+// ENTER CITY HERE
+let cityChecker = function (event) {
     event.preventDefault();
+
     let checkCity = inputEl.value
+
     if (checkCity) {
         pullWeather(checkCity);
     } else {
-        alert("Enter a Town/City here")
+        alert("Please enter a City")
     }
 }
 
@@ -119,15 +137,13 @@ function kelvinToFahrenheit(K) {
     return Math.floor((K - 273.15) * 1.8 + 32);
 }
 
-let checkInputCity = function (NameOC) {
+let checkInputCity = function (cityName) {
     let inputCheck = false;
     let knownCities = false;
-    for (let i = 0; i < searchedCity.length; i++) {
+    for (let i = 0; i < CitiesSearched.length; i++) {
         let storedCity = document.createElement("input");
-        
-        storedCity.setAttribute("value", searchedCity[i]);
-
-        if (NameOC === storedCity.value) {
+        storedCity.setAttribute("value", CitiesSearched[i]);
+        if (cityName === storedCity.value) {
             inputCheck = true;
             knownCities = true;
         } 
@@ -138,45 +154,50 @@ let checkInputCity = function (NameOC) {
         }
     }  
     if (inputCheck === false) {
-        searchedCity.push(NameOC);
-        localStorage.setItem("search", JSON.stringify(searchedCity));
+        CitiesSearched.push(cityName);
+        localStorage.setItem("search", JSON.stringify(CitiesSearched));
     }
     displaySearch();
 }
-
+// CITY IS DISPLAYED HERE
 function displaySearch() {
-    storedEl.innerHTML = "";
-    for (let i = 0; i < searchedCity.length; i++) {
+    historyEl.innerHTML = "";
+
+    for (let i = 0; i < CitiesSearched.length; i++) {
         let storedCity = document.createElement("input");
-        
+
         storedCity.setAttribute("type", "text");
 
         storedCity.setAttribute("readonly", true);
 
         storedCity.setAttribute("class", "form-control d-block bg-white");
-        storedCity.setAttribute("value", searchedCity[i]);
+
+        storedCity.setAttribute("value", CitiesSearched[i]);
 
         storedCity.addEventListener("click", function () {
             pullWeather(storedCity.value);
         })
-        storedEl.append(storedCity);
+        historyEl.append(storedCity);
     }
 }
 
 function init() {
     displaySearch();
-    if (searchedCity.length > 0) {
-        pullWeather(searchedCity[searchedCity.length - 1]);
+
+    if (CitiesSearched.length > 0) {
+        pullWeather(CitiesSearched[CitiesSearched.length - 1]);
     }
 }
 
 //event listeners
-searchEl.addEventListener("click", CheckingCity);
+searchEl.addEventListener("click", cityChecker);
 
 deleteHistory.addEventListener("click", function () {
-    searchedCity = [];
+    CitiesSearched = [];
+
     displaySearch();
-    localStorage.setItem("search", JSON.stringify(searchedCity));
+
+    localStorage.setItem("search", JSON.stringify(CitiesSearched));
 });
 
 init();
